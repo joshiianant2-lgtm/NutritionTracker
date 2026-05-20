@@ -3,6 +3,7 @@ package com.nutrition.dao;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class DBConnection {
 
@@ -13,21 +14,20 @@ public class DBConnection {
             throw new SQLException("DATABASE_URL environment variable not set");
         }
 
-        // Handle both postgres:// and postgresql:// formats
         if (url.startsWith("postgres://")) {
             url = url.replace("postgres://", "jdbc:postgresql://");
         } else if (url.startsWith("postgresql://")) {
             url = url.replace("postgresql://", "jdbc:postgresql://");
         }
 
-        // Add SSL — required by Render PostgreSQL
-        if (!url.contains("sslmode")) {
-            url += (url.contains("?") ? "&" : "?") + "sslmode=require";
-        }
+        // Use Properties to set SSL options
+        Properties props = new Properties();
+        props.setProperty("sslmode", "require");
+        props.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
 
         try {
             Class.forName("org.postgresql.Driver");
-            return DriverManager.getConnection(url);
+            return DriverManager.getConnection(url, props);
         } catch (ClassNotFoundException e) {
             throw new SQLException("PostgreSQL JDBC Driver not found", e);
         }
