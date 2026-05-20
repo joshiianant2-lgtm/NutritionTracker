@@ -13,10 +13,16 @@ public class DBConnection {
             throw new SQLException("DATABASE_URL environment variable not set");
         }
 
-        // Railway provides DATABASE_URL in postgres:// format
-        // Convert to jdbc:postgresql:// format if needed
+        // Handle both postgres:// and postgresql:// formats
         if (url.startsWith("postgres://")) {
             url = url.replace("postgres://", "jdbc:postgresql://");
+        } else if (url.startsWith("postgresql://")) {
+            url = url.replace("postgresql://", "jdbc:postgresql://");
+        }
+
+        // Add SSL — required by Render PostgreSQL
+        if (!url.contains("sslmode")) {
+            url += (url.contains("?") ? "&" : "?") + "sslmode=require";
         }
 
         try {
