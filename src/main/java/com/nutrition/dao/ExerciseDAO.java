@@ -70,8 +70,9 @@ public class ExerciseDAO {
 
     public List<ExerciseLog> getTodayExercises(int userId) {
         List<ExerciseLog> exercises = new ArrayList<>();
+        // PostgreSQL: use CURRENT_DATE instead of TRUNC(SYSDATE)
         String sql = "SELECT * FROM exercise_logs WHERE user_id = ? " +
-                     "AND TRUNC(log_date) = TRUNC(SYSDATE) ORDER BY log_date DESC";
+                     "AND log_date::date = CURRENT_DATE ORDER BY log_date DESC";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -93,8 +94,9 @@ public class ExerciseDAO {
     }
 
     public double getTotalCaloriesBurnedToday(int userId) {
+        // PostgreSQL: use CURRENT_DATE instead of TRUNC(SYSDATE)
         String sql = "SELECT SUM(calories_burned) FROM exercise_logs " +
-                     "WHERE user_id = ? AND TRUNC(log_date) = TRUNC(SYSDATE)";
+                     "WHERE user_id = ? AND log_date::date = CURRENT_DATE";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);

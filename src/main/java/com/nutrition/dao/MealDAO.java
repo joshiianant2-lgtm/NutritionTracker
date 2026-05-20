@@ -14,13 +14,12 @@ public class MealDAO {
 
     // Log a meal using servings (quantity = number of servings)
     public boolean logMeal(MealLog meal) {
-        // quantity_grams stores actual grams = servings * serving_size_g
         String sql = "INSERT INTO meal_logs (user_id, food_id, quantity_grams) VALUES (?, ?, ?)";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, meal.getUserId());
             ps.setInt(2, meal.getFoodId());
-            ps.setDouble(3, meal.getQuantityGrams()); // actual grams already calculated
+            ps.setDouble(3, meal.getQuantityGrams());
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -52,7 +51,6 @@ public class MealDAO {
                 food.put("fat", rs.getDouble("fat"));
                 food.put("servingSizeG", rs.getDouble("serving_size_g"));
                 food.put("servingDescription", rs.getString("serving_description"));
-                // Calories per serving
                 double calsPerServing = (rs.getDouble("calories_per_100g") * rs.getDouble("serving_size_g")) / 100;
                 food.put("caloriesPerServing", Math.round(calsPerServing));
                 categorized.get(category).add(food);
@@ -63,7 +61,7 @@ public class MealDAO {
         return categorized;
     }
 
-    // Get single food item info (for live preview via AJAX or form submit)
+    // Get single food item info
     public Map<String, Object> getFoodById(int foodId) {
         String sql = "SELECT id, name, calories_per_100g, protein, carbs, fat, " +
                      "serving_size_g, serving_description, category FROM food_items WHERE id = ?";
@@ -91,11 +89,12 @@ public class MealDAO {
 
     public List<MealLog> getTodayMeals(int userId) {
         List<MealLog> meals = new ArrayList<>();
+        // PostgreSQL: use CURRENT_DATE instead of TRUNC(SYSDATE)
         String sql = "SELECT m.id, m.quantity_grams, m.log_date, " +
                      "f.name, f.calories_per_100g, f.protein, f.carbs, f.fat, " +
                      "f.serving_size_g, f.serving_description " +
                      "FROM meal_logs m JOIN food_items f ON m.food_id = f.id " +
-                     "WHERE m.user_id = ? AND TRUNC(m.log_date) = TRUNC(SYSDATE) " +
+                     "WHERE m.user_id = ? AND m.log_date::date = CURRENT_DATE " +
                      "ORDER BY m.log_date DESC";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -114,7 +113,6 @@ public class MealDAO {
                 meal.setCarbs((rs.getDouble("carbs") * qty) / 100);
                 meal.setFat((rs.getDouble("fat") * qty) / 100);
 
-                // Show serving description instead of raw grams
                 double servingSizeG = rs.getDouble("serving_size_g");
                 String servingDesc = rs.getString("serving_description");
                 if (servingSizeG > 0) {
@@ -137,9 +135,10 @@ public class MealDAO {
     }
 
     public double getTotalCaloriesToday(int userId) {
+        // PostgreSQL: use CURRENT_DATE instead of TRUNC(SYSDATE)
         String sql = "SELECT SUM((f.calories_per_100g * m.quantity_grams) / 100) " +
                      "FROM meal_logs m JOIN food_items f ON m.food_id = f.id " +
-                     "WHERE m.user_id = ? AND TRUNC(m.log_date) = TRUNC(SYSDATE)";
+                     "WHERE m.user_id = ? AND m.log_date::date = CURRENT_DATE";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -151,14 +150,13 @@ public class MealDAO {
         return 0;
     }
 
-    // Get macro totals for today
     public double[] getTotalMacrosToday(int userId) {
-        // returns [protein, carbs, fat]
+        // PostgreSQL: use CURRENT_DATE instead of TRUNC(SYSDATE)
         String sql = "SELECT SUM((f.protein * m.quantity_grams) / 100), " +
                      "SUM((f.carbs * m.quantity_grams) / 100), " +
                      "SUM((f.fat * m.quantity_grams) / 100) " +
                      "FROM meal_logs m JOIN food_items f ON m.food_id = f.id " +
-                     "WHERE m.user_id = ? AND TRUNC(m.log_date) = TRUNC(SYSDATE)";
+                     "WHERE m.user_id = ? AND m.log_date::date = CURRENT_DATE";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);

@@ -5,16 +5,25 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-	 private static final String URL = "jdbc:oracle:thin:@joshi:1521/XE";
-	    private static final String USERNAME = "fitness";
-	    private static final String PASSWORD = "gym";
-	    
-	    public static Connection getConnection() throws SQLException {
-	        try {
-	            Class.forName("oracle.jdbc.driver.OracleDriver");
-	            return DriverManager.getConnection(URL, USERNAME, PASSWORD);
-	        } catch (ClassNotFoundException e) {
-	            throw new SQLException("Oracle JDBC Driver not found", e);
-	        }
-	    }
+
+    public static Connection getConnection() throws SQLException {
+        String url = System.getenv("DATABASE_URL");
+
+        if (url == null || url.isEmpty()) {
+            throw new SQLException("DATABASE_URL environment variable not set");
+        }
+
+        // Railway provides DATABASE_URL in postgres:// format
+        // Convert to jdbc:postgresql:// format if needed
+        if (url.startsWith("postgres://")) {
+            url = url.replace("postgres://", "jdbc:postgresql://");
+        }
+
+        try {
+            Class.forName("org.postgresql.Driver");
+            return DriverManager.getConnection(url);
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("PostgreSQL JDBC Driver not found", e);
+        }
+    }
 }
