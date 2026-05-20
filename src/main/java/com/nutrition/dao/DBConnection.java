@@ -1,5 +1,6 @@
 package com.nutrition.dao;
 
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -8,28 +9,37 @@ import java.util.Properties;
 public class DBConnection {
 
     public static Connection getConnection() throws SQLException {
-        String url = System.getenv("DATABASE_URL");
+        String dbUrl = System.getenv("DATABASE_URL");
 
-        if (url == null || url.isEmpty()) {
+        if (dbUrl == null || dbUrl.isEmpty()) {
             throw new SQLException("DATABASE_URL environment variable not set");
         }
 
-        if (url.startsWith("postgres://")) {
-            url = url.replace("postgres://", "jdbc:postgresql://");
-        } else if (url.startsWith("postgresql://")) {
-            url = url.replace("postgresql://", "jdbc:postgresql://");
-        }
-
-        // Use Properties to set SSL options
-        Properties props = new Properties();
-        props.setProperty("sslmode", "require");
-        props.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
-
         try {
             Class.forName("org.postgresql.Driver");
-            return DriverManager.getConnection(url, props);
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("PostgreSQL JDBC Driver not found", e);
+
+            // Parse the URI to extract components
+            URI uri = new URI(dbUrl);
+            String host = uri.getHost();
+            int port = uri.getPort() == -1 ? 5432 : uri.getPort();
+            String path = uri.getPath(); // e.g. /nutritiontracker_db
+            String[] userInfo = uri.getUserInfo().split(":");
+            String user = userInfo[0];
+            String password = userInfo[1];
+
+            String jdbcUrl = "jdbc:postgresql://" + host + ":" + port + path
+                           + "?sslmode=require";
+
+            Properties props = new Properties();
+            props.setProperty("user", user);
+            props.setProperty("password", password);
+            props.setProperty("sslmode", "require");
+            props.setProperty("sslfactory", "org.postgresql.ssl.NonValidatingFactory");
+
+            return DriverManager.getConnection(jdbcUrl, props);
+
+        } catch (Exception e) {
+            throw new SQLException("Failed to connect: " + e.getMessage(), e);
         }
     }
 }
