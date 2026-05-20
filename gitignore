@@ -1,0 +1,39 @@
+# ========================
+# Java Build Output
+# ========================
+build/
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# ========================
+# Eclipse Project Files
+# ========================
+.settings/
+.classpath
+.project
+.metadata/
+bin/
+
+# ========================
+# Sensitive / Heavy JARs
+# (add these manually to WEB-INF/lib on each machine)
+# ========================
+**/WEB-INF/lib/ojdbc11.jar
+**/WEB-INF/lib/bcrypt-0.10.2.jar
+**/WEB-INF/lib/bytes-1.5.0.jar
+
+# ========================
+# OS Files
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# Logs
+# ========================
+*.log
+logs/
