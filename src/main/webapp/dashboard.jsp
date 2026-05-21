@@ -11,6 +11,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -129,9 +130,9 @@
         .action-btn-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,79,79,0.2); padding: 0.5rem 1.2rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; white-space: nowrap; }
 
         /* TABLES */
-        .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; overflow-x: auto; }
         .table-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
-        .custom-table { width: 100%; border-collapse: collapse; }
+        .custom-table { width: 100%; border-collapse: collapse; min-width: 400px; }
         .custom-table th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); font-weight: 500; text-align: left; }
         .custom-table td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; color: var(--text); }
         .custom-table tr:last-child td { border-bottom: none; }
@@ -145,11 +146,12 @@
             display: none; position: fixed; inset: 0;
             background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
             z-index: 999; align-items: center; justify-content: center;
+            padding: 1rem;
         }
         .modal-overlay.show { display: flex; }
         .modal-box {
             background: var(--surface); border: 1px solid var(--border);
-            border-radius: 20px; padding: 2rem; max-width: 380px; width: 90%;
+            border-radius: 20px; padding: 2rem; max-width: 380px; width: 100%;
             text-align: center; animation: fadeUp 0.3s ease both;
         }
         .modal-icon { font-size: 2.5rem; margin-bottom: 1rem; }
@@ -173,6 +175,40 @@
         .macro-card:nth-child(2) { animation-delay: 0.45s; }
         .macro-card:nth-child(3) { animation-delay: 0.5s; }
         .table-card { animation: fadeUp 0.4s ease 0.5s both; }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            .navbar { padding: 0.8rem 1rem; }
+            .welcome-text { display: none; }
+            .main { padding: 1rem; }
+            .page-title { font-size: 1.4rem; }
+            .page-subtitle { margin-bottom: 1.2rem; }
+
+            .stat-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+            .stat-value { font-size: 2rem; }
+
+            .macro-grid { grid-template-columns: repeat(3, 1fr); gap: 0.6rem; }
+            .macro-value { font-size: 1.2rem; }
+            .macro-card { padding: 0.8rem; }
+            .macro-target { font-size: 0.65rem; }
+
+            .action-grid { grid-template-columns: 1fr; gap: 0.8rem; }
+            .action-card { flex-direction: row; }
+
+            .target-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+
+            .table-card { padding: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-brand { font-size: 1.1rem; }
+            .btn-nav { padding: 0.35rem 0.7rem; font-size: 0.8rem; }
+            .macro-grid { gap: 0.4rem; }
+            .macro-value { font-size: 1rem; }
+            .macro-label { font-size: 0.65rem; }
+            .action-info h5 { font-size: 0.95rem; }
+            .action-info p { font-size: 0.78rem; }
+        }
     </style>
 </head>
 <body>
@@ -229,7 +265,6 @@
     String balanceLabel;
 
     if (hasProfile && calorieTarget > 0) {
-        // FIX: Use netCalories (consumed - burned) for progress, not just consumed
         progressPct = (int) Math.min(Math.max((netCalories / calorieTarget) * 100, 0), 100);
         if (netCalories > calorieTarget * 1.1)      { progressClass = "over";     balanceLabel = "Over Target"; }
         else if (netCalories < calorieTarget * 0.5) { progressClass = "under";    balanceLabel = "Under Target"; }
@@ -244,7 +279,6 @@
     int carbsPct   = carbsTarget   > 0 ? (int) Math.min((totalCarbs   / carbsTarget)   * 100, 100) : 0;
     int fatPct     = fatTarget     > 0 ? (int) Math.min((totalFat     / fatTarget)     * 100, 100) : 0;
 
-    // FIX: remaining = target - consumed + burned (exercise calories add back to budget)
     double remaining = calorieTarget - caloriesIn + caloriesOut;
 
     List<MealLog> meals         = mealDAO.getTodayMeals(user.getId());
@@ -269,7 +303,7 @@
 
 <nav class="navbar d-flex align-items-center justify-content-between">
     <span class="navbar-brand">⚡ NutriTrack</span>
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2">
         <span class="welcome-text">Hey, <%= user.getName() %> 👋</span>
         <a href="profile.jsp" class="btn-nav">Profile</a>
         <button class="btn-nav logout" onclick="showLogoutModal()">Logout</button>
@@ -311,7 +345,6 @@
             <div class="target-title">🎯 Daily Calorie Target</div>
             <% if (hasProfile) { %>
                 <div class="target-numbers">
-                    <%-- Show net calories vs target (consumed - burned) --%>
                     <span style="color:var(--green);"><%= String.format("%.0f", netCalories) %></span>
                     <span style="color:var(--muted);"> / </span>
                     <span><%= String.format("%.0f", calorieTarget) %> kcal</span>
@@ -447,7 +480,6 @@
     function closeLogoutModal() {
         document.getElementById('logoutModal').classList.remove('show');
     }
-    // Close modal if clicking outside
     document.getElementById('logoutModal').addEventListener('click', function(e) {
         if (e.target === this) closeLogoutModal();
     });

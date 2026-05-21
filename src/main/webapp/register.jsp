@@ -3,6 +3,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - NutriTrack</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -29,6 +30,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
         }
 
         .glow-bg {
@@ -92,6 +94,7 @@
             padding: 0.75rem 1rem;
             font-family: 'DM Sans', sans-serif;
             transition: all 0.2s;
+            font-size: 1rem;
         }
 
         .form-control:focus {
@@ -151,6 +154,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .card { animation: fadeUp 0.4s ease both; }
+
+        @media (max-width: 480px) {
+            .card { padding: 1.5rem; border-radius: 16px; }
+            .brand { font-size: 1.3rem; }
+        }
     </style>
 </head>
 <body>
