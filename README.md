@@ -23,22 +23,22 @@
 ### 🔐 Login & Register
 | Login | Register |
 |-------|----------|
-| ![Login](screenshots/login.png) | ![Register](screenshots/register.png) |
+| ![Login](src/main/webapp/screenshots/login.png) | ![Register](src/main/webapp/screenshots/register.png) |
 
 ### 📊 Dashboard
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](src/main/webapp/screenshots/dashboard.png)
 
 ### 🍽️ Log Meal — 56 Indian Food Items
-![Log Meal](screenshots/logmeal.png)
+![Log Meal](src/main/webapp/screenshots/logmeal.png)
 
 ### 🏃 Log Exercise
-![Log Exercise](screenshots/logexercise.png)
+![Log Exercise](src/main/webapp/screenshots/logexercise.png)
 
 ### 👤 Profile Setup
-![Profile](screenshots/profile.png)
+![Profile](src/main/webapp/screenshots/profile.png)
 
 ### 📱 Mobile Responsive
-![Mobile](screenshots/mobile.png)
+![Mobile](src/main/webapp/screenshots/mobile.png)
 
 ---
 
